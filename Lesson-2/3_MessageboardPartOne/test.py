@@ -43,8 +43,32 @@ def test_POST():
         return None
 
 
+def test_GET():
+    '''The server should accept a GET and return the form.'''
+    print("Testing GET request.")
+    uri = "http://localhost:8000/"
+    try:
+        r = requests.get(uri)
+    except requests.RequestException as e:
+        return ("Couldn't communicate with the server. ({})\n"
+                "If it's running, take a look at its output.").format(e)
+    if r.status_code == 501:
+        return ("The server returned status code 501 Not Implemented.\n"
+                "This means it doesn't know how to handle a GET request.\n"
+                "(Is the correct server code running?)")
+    elif r.status_code != 200:
+        return ("The server returned status code {} instead of a 200 OK."
+                ).format(r.status_code)
+    elif not r.headers['content-type'].startswith('text/html'):
+        return ("The server didn't return Content-type: text/html.")
+    elif '<title>Message Board</title>' not in r.text:
+        return ("The server didn't return the form text I expected.")
+    else:
+        print("GET request succeeded!")
+        return None
+
 if __name__ == '__main__':
-    tests = [test_connect, test_POST]
+    tests = [test_connect, test_POST, test_GET]
     for test in tests:
         problem = test()
         if problem is not None:
